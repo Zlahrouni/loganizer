@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/zlahrouni/loganizer/internal/analyzer"
 	"github.com/zlahrouni/loganizer/internal/config"
+	"github.com/zlahrouni/loganizer/internal/reporter"
 )
 
 var (
@@ -20,6 +21,7 @@ var (
 	sortBy       string
 	filterType   string
 	filterStatus string
+	exportJSON   bool
 )
 
 var analyzeCmd = &cobra.Command{
@@ -56,6 +58,7 @@ func init() {
 	analyzeCmd.Flags().StringVar(&sortBy, "sort", "", "trier par: 'id', 'entries', 'duration', 'status' (optionnel)")
 	analyzeCmd.Flags().StringVar(&filterType, "filter-type", "", "filtrer par type de log (optionnel)")
 	analyzeCmd.Flags().StringVar(&filterStatus, "filter-status", "", "filtrer par statut: 'success', 'error' (optionnel)")
+	analyzeCmd.Flags().BoolVar(&exportJSON, "json", false, "exporter les erreurs au format JSON (utilise le package reporter)")
 }
 
 type AnalysisStatus struct {
@@ -111,11 +114,19 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 	displayResults(statuses, totalDuration)
 
 	if outputFile != "" {
-		err := saveResults(statuses, totalDuration)
-		if err != nil {
-			return fmt.Errorf("erreur lors de la sauvegarde: %v", err)
+		if exportJSON {
+			err := saveErrorsAsJSON(errs)
+			if err != nil {
+				return fmt.Errorf("erreur lors de la sauvegarde JSON: %v", err)
+			}
+			fmt.Printf("\nErreurs exportées en JSON dans: %s\n", outputFile)
+		} else {
+			err := saveResults(statuses, totalDuration)
+			if err != nil {
+				return fmt.Errorf("erreur lors de la sauvegarde: %v", err)
+			}
+			fmt.Printf("\nRésultats sauvegardés dans: %s\n", outputFile)
 		}
-		fmt.Printf("\nRésultats sauvegardés dans: %s\n", outputFile)
 	}
 
 	return nil
@@ -284,4 +295,17 @@ func saveResults(statuses []AnalysisStatus, totalDuration time.Duration) error {
 	}
 
 	return nil
+}
+
+func saveErrorsAsJSON(errs []error) error {
+	var fileNotFoundErrors []analyzer.FileNotFoundOrUnreadableError
+
+	for _, err := range errs {
+		var notFoundErr *analyzer.FileNotFoundOrUnreadableError
+		if errors.As(err, &notFoundErr) {
+			fileNotFoundErrors = append(fileNotFoundErrors, *notFoundErr)
+		}
+	}
+
+	return reporter.ExportResultsToJsonFile(outputFile, fileNotFoundErrors)
 }
