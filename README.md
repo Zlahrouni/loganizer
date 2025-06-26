@@ -1,3 +1,9 @@
+### Dévelopé par :
+- Ziad Lahrouni
+- Sara Bevilacqua
+- Sabrina Tamda
+- Mohamed Kerraz
+
 # TP : GoLog Analyzer - Analyse de Logs Distribuée
 
 ### Contexte
