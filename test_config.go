@@ -7,7 +7,7 @@ import (
 	"github.com/zlahrouni/loganizer/internal/config"
 )
 
-func main() {
+func main_test() {
 	fmt.Println("=== Test du package config ===")
 
 	configs, err := config.LoadConfig("config.json")
