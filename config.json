@@ -28,5 +28,20 @@
     "id": "corrupted-log",
     "path": "test_logs/corrupted.log",
     "type": "custom-app"
+  },
+  {
+    "id": "app-log",
+    "path": "C:\\logs\\app.log",
+    "type": "application"
+  },
+  {
+    "id": "database-log",
+    "path": "C:/Program Files/Git/var/log/mysql/error.log",
+    "type": "mysql-error"
+  },
+  {
+    "id": "new-server",
+    "path": "C:/Program Files/Git/var/log/new.log",
+    "type": "nginx"
   }
 ]
